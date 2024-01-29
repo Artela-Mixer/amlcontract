@@ -1,13 +1,14 @@
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-pragma solidity ^0.8.4;
+pragma solidity ^0.8.20;
 
-contract Aml {
+contract Aml is Ownable{
     bytes32 private root;
     uint32 public is_verified;
     mapping(address => uint256) public deposits;
     event Deposit(address indexed user, uint256 amount);
     event Withdrawal(address indexed user, uint256 amount);
+    event RootUpdated(bytes32 indexed root);
 
     constructor(bytes32 _root) Ownable(_msgSender()) {
         root = _root;
@@ -21,6 +22,7 @@ contract Aml {
     }
 
     function withdraw(uint256 amount) public {
+        is_verified = 1;
         require(deposits[msg.sender] >= amount, "Insufficient balance");
         deposits[msg.sender] -= amount;
         payable(msg.sender).transfer(amount);
@@ -30,6 +32,7 @@ contract Aml {
     //function setRoot(bytes32 _root) public onlyOwner {
     function setRoot(bytes32 _root) public {
         root = _root;
+        emit RootUpdated(_root);
     }
 
     function getRoot() public view returns (bytes32) {
@@ -43,15 +46,12 @@ contract Aml {
     function verify(
         bytes32[] memory proof,
         address addr
-    ) public view{
-        bytes32 leaf = bytes32(uint256(addr));
-        try MerkleProof.verify(proof, root, leaf) returns (bool verified) {
-            if (verified) {
-                is_verified = 1;
-            } else {
-                is_verified = 0;
-            }
-        } catch Error(string memory) {
+    ) public {
+        bytes32 leaf = keccak256(bytes.concat(keccak256(abi.encode(addr))));
+        bool verified = MerkleProof.verify(proof, root, leaf);
+        if (verified) {
+            is_verified = 1;
+        } else {
             is_verified = 0;
         }
     }

@@ -42,60 +42,24 @@ class Aspect implements IPostContractCallJP {
      * @param input input to the current join point
      */
     postContractCall(input: PostContractCallInput): void {
-        sys.log("Aml postContractCall");
+        sys.log("AmlPostContractCall start");
         // 合约变量查询
         const account = hexToUint8Array("0xdc32695f60B4a517de56351CB65332311B1bEF08");
         const stateVar = 'Aml.root';
         const query= new StateChangeQuery(account,stateVar,[]);
-        //const root = new State(uint8ArrayToHex(raw.account), uint8ArrayToHex(raw.value), raw.callIndex);
-        //const response = sys.hostApi.trace.queryStateChange(query);
-        //const indicesResult = Protobuf.decode<EthStateChangeIndices>(response, EthStateChangeIndices.decode);
 
-        //return new State(uint8ArrayToHex(raw.account), uint8ArrayToHex(raw.value), raw.callIndex);
-
-        // 1.Calculate the eth balance change of DeFi SmartContract(HoneyPot) before and after tx.
-        //const to = uint8ArrayToHex(input.call!.to);
-        //const from = uint8ArrayToHex(input.call!.from);
-        //const query = new StateChangeQuery(to, "Aml.root",[]);
-
-        //new State(uint8ArrayToHex(raw.account), uint8ArrayToHex(raw.value), raw.callIndex);
-
-        // let data = sys.hostApi.crypto.keccak(sys.utils.stringToUint8Array("test"));
-        //
-/*
- *        export class deployer extends StateChange<string> {
- *
- *            constructor(addr: string, indices: Uint8Array[] = []) {
- *                super(new StateChangeProperties(addr, 'HoneyPot.deployer', indices));
- *            }
- *
- *            override unmarshalState(raw: EthStateChange): State<string> {
- *                return new State(uint8ArrayToHex(raw.account), uint8ArrayToHex(raw.value), raw.callIndex);
- *            }
- *        }
- */
-        // 调用tree
-        var callTreeQuery = new CallTreeQuery(-1);
-        let response = sys.hostApi.trace.queryCallTree(callTreeQuery)
-        const callTree = Protobuf.decode<EthCallTree>(response, EthCallTree.decode);
-        var arrayKeys = callTree.calls.keys();
-        const key = arrayKeys[0];
-        var oneCall = callTree.calls.get(key);
-        // oneCall.data
-
-        
-        //let callTreeJson = JSON.stringify(callTree);
-        //sys.log(callTreeJson);
-
-
-
-
-
-
-
+        const contract = hexToUint8Array("0xdc32695f60B4a517de56351CB65332311B1bEF08")
+        const hash = hexToUint8Array("0x0000000000000000000000000000000000000000000000000000000000000001")
+        let is_verified = sys.hostApi.stateDb.stateAt(contract, hash);
+        sys.log("AmlPostContractCall is_verified:" + is_verified.toString());
+        if (!is_verified) {
+            //sys.log("AmlPostContractCall failed:" + is_verified.toString());
+            sys.revert("Verification failed");
+        }
         // 1.Calculate the eth balance change of DeFi SmartContract(HoneyPot) before and after tx.
         const to = uint8ArrayToHex(input.call!.to);
         const from = uint8ArrayToHex(input.call!.from);
+        sys.log("AmlPostContractCall end");
     }
 }
 

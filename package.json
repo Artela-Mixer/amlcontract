@@ -17,7 +17,7 @@
     "contract:bind": "node scripts/bind.cjs",
     "contract:unbind": "node scripts/unbind.cjs",
     "contract:deploy": "node scripts/contract-deploy.cjs",
-    "contract:build": "solc -o ./build/contract/ --via-ir --abi --storage-layout --bin ./contracts/*.sol --overwrite",
+    "contract:build": "solc -o ./build/contract/ --via-ir --abi --storage-layout --bin ./contracts/*.sol --base-path . --overwrite",
     "build": "npm run contract:build && npm run aspect:gen && npm run aspect:build"
   },
   "keywords": [],
