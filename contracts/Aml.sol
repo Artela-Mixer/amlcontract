@@ -9,6 +9,8 @@ contract Aml is Ownable{
     event Deposit(address indexed user, uint256 amount);
     event Withdrawal(address indexed user, uint256 amount);
     event RootUpdated(bytes32 indexed root);
+    event VerifyFaild(address indexed addr);
+    event VerifySucceed(address indexed addr);
 
     constructor(bytes32 _root) Ownable(_msgSender()) {
         root = _root;
@@ -51,8 +53,10 @@ contract Aml is Ownable{
         bool verified = MerkleProof.verify(proof, root, leaf);
         if (verified) {
             is_verified = 1;
+            emit VerifySucceed(addr);
         } else {
             is_verified = 0;
+            emit VerifyFaild(addr);
         }
     }
 }
